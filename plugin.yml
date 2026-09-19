@@ -1,0 +1,29 @@
+name: Trodden
+version: '1.0.0'
+main: dev.thathunky.trodden.Trodden
+api-version: '1.21'
+author: matsuri-admin
+description: Ground trampling — grass becomes coarse dirt, then a path; paths give a speed bonus
+softdepend: [HuskClaims, WorldGuard, GriefPrevention, Lands, Towny]
+commands:
+  paths:
+    description: Toggle path trampling in your own claim
+    usage: /paths on|off|state
+    aliases: [стежки, stezhky]
+    permission: trodden.use
+permissions:
+  trodden.use:
+    description: The /paths command (стежки)
+    default: true
+  trodden.admin:
+    description: Toggle trampling in other players' and admin claims
+    default: op
+  wear.use:
+    description: "Legacy node kept for compatibility — same as trodden.use"
+    default: true
+  wear.admin:
+    description: "Legacy node kept for compatibility — same as trodden.admin"
+    default: op
+  matsuri.wear.admin:
+    description: "Legacy node kept for compatibility — same as trodden.admin"
+    default: op

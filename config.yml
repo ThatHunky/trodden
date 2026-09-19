@@ -1,0 +1,67 @@
+# Ground trampling by players.
+# Language of player-facing messages: en or uk (files in lang/ inside the jar, or a custom one in
+# the plugin folder's lang/).
+language: en
+# The counter is cumulative: a step = a player moved onto a block (while on the ground, in
+# survival/adventure).
+wear:
+  coarse-at: 50      # this many steps — grass becomes coarse dirt
+  path-at: 100       # this many steps — becomes a path
+  grass:             # what counts as "grass"
+    - GRASS_BLOCK
+    - PODZOL
+    - MYCELIUM
+worlds:
+  - world
+# Speed bonus on a path block (0.15 = +15% of base speed). DIRT_PATH only, not slabs.
+path-speed-bonus: 0.15
+# How often to write counters into chunks (minutes); also happens on chunk unload and shutdown.
+save-minutes: 5
+# Claims: trampling is off until the owner says /paths on.
+# The first enabled plugin found from this list is used; empty means the default order
+# (huskclaims, lands, towny, griefprevention, worldguard). None found — wear applies everywhere.
+claims:
+  prefer: []
+# Regrowth: how many days without steps take one stage back (path -> coarse dirt -> grass).
+regrowth:
+  enabled: true
+  days-per-stage: 7
+  sweep-minutes: 5
+  season-factor:     # 0 — never regrows
+    spring: 0.5
+    summer: 0.8
+    autumn: 1.2
+    winter: 0.0
+# Season start dates (MM-DD) — or a path to season.json from MatsuriSeasons.
+seasons:
+  spring: "03-01"
+  summer: "06-01"
+  autumn: "09-01"
+  winter: "12-01"
+  json: ""          # e.g. /home/thathunky/games/servers/matsuri/web/season.json
+# Probes near players — what this plugin uses instead of the vanilla random tick.
+# The bigger the numbers, the faster the world ages and the more work for the server.
+sampling:
+  enabled: true
+  seconds: 10
+  radius: 12
+  per-player: 6
+# Stone aging: moss near water and under rain, cracks near lava. Cleaned with a brush.
+aging:
+  enabled: true
+  chance: 0.02      # chance per probe, when the condition is met
+  brush-cleans: true
+# Leaf litter in autumn under tree canopies (vanilla leaf_litter, Bedrock sees the same thing).
+litter:
+  enabled: true
+  chance: 0.05
+  max-nearby: 3     # how much litter within radius 2 counts as "enough"
+# A path washes into mud in the rain under open sky, and dries back without rain.
+mud:
+  enabled: true
+  wet-chance: 0.05   # chance per probe, when it's raining and the sky is open
+  dry-chance: 0.2     # higher than wet-chance, so roads don't stay muddy for days
+# Tracks in snow: a step removes one layer. Snowfall piles it back up on its own.
+snow-tracks: true
+# Ridden horses, donkeys, mules and camels trample the ground for two.
+mounts-wear: true

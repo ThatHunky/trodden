@@ -1,0 +1,9 @@
+# Player-facing text: /paths (стежки) — Trodden. Also the fallback for any key missing from
+# a chosen language file.
+paths-on: "<green>Done: trampling is now on in this claim.</green>"
+paths-off: "<green>Done: trampling is now off in this claim.</green>"
+paths-state-on: "<green>Trampling is happening in this claim.</green>"
+paths-state-off: "<gray>Trampling isn't happening in this claim. The owner can: <white>/paths on</white></gray>"
+not-in-claim: "<gray>This isn't a claim — the ground always wears from walking here.</gray>"
+not-your-claim: "<red>Only the claim owner can change this.</red>"
+usage: "<gray>/paths on | off | state</gray>"
