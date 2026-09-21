@@ -259,7 +259,7 @@ final class WearListener implements Listener {
 
     private static boolean trampled(Material m) {
         return Tag.REPLACEABLE.isTagged(m) || Tag.SMALL_FLOWERS.isTagged(m) || m == Material.SHORT_GRASS
-                || m == Material.FERN || m == Material.LEAF_LITTER;
+                || m == Material.FERN || Compat.is(m, Compat.LEAF_LITTER);
     }
 
     void updateSpeed(Player p, boolean onPath) {

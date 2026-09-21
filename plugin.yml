@@ -1,8 +1,8 @@
 name: Trodden
-version: '1.0.0'
+version: '1.1.0'
 main: dev.thathunky.trodden.Trodden
-api-version: '1.21'
-author: matsuri-admin
+api-version: '1.21.4'
+author: ThatHunky
 description: Ground trampling — grass becomes coarse dirt, then a path; paths give a speed bonus
 softdepend: [HuskClaims, WorldGuard, GriefPrevention, Lands, Towny]
 commands:

@@ -59,7 +59,9 @@ public final class Trodden extends JavaPlugin {
         boolean brushCleans = agingEnabled && getConfig().getBoolean("aging.brush-cleans", true);
 
         boolean litterEnabled = getConfig().getBoolean("litter.enabled", true);
-        if (litterEnabled && samplingEnabled) {
+        if (litterEnabled && samplingEnabled && Compat.LEAF_LITTER == null) {
+            getLogger().info("Leaf litter needs Minecraft 1.21.5 or newer — litter is off on this server.");
+        } else if (litterEnabled && samplingEnabled) {
             LitterRules litter = new LitterRules(Set.of("GRASS_BLOCK", "DIRT", "COARSE_DIRT", "DIRT_PATH", "PODZOL"),
                     getConfig().getInt("litter.max-nearby", 3));
             sampler.add(new LitterProbe(this, seasons, litter, getConfig().getDouble("litter.chance", 0.05)));
@@ -92,26 +94,6 @@ public final class Trodden extends JavaPlugin {
                 + ", -> path at " + rules.pathAt() + " steps; worlds " + worlds + "; path speed bonus +"
                 + Math.round(bonus * 100) + "%; claims " + (claims != null ? "checked, owner opt-in" : "NOT checked")
                 + "; regrowth " + (regrowthEnabled ? "enabled" : "disabled"));
-
-        initMetrics();
-    }
-
-    /**
-     * Starts bStats metrics if {@code dev.thathunky.trodden.stats.PluginMetrics} is on the classpath.
-     * That class lives outside {@code src/main/java} and is only woven into the Gradle-built,
-     * shaded jar — the fast local {@code build.sh} jar used to ship to the live server never
-     * contains it, so this is a silent no-op there, and nothing about the live server's behaviour
-     * changes.
-     */
-    private void initMetrics() {
-        try {
-            Class<?> metricsClass = Class.forName("dev.thathunky.trodden.stats.PluginMetrics");
-            metricsClass.getConstructor(org.bukkit.plugin.java.JavaPlugin.class).newInstance(this);
-        } catch (ClassNotFoundException ignored) {
-            // Not present in this build (e.g. build.sh's jar) — metrics simply don't start.
-        } catch (ReflectiveOperationException e) {
-            getLogger().warning("bStats metrics failed to start: " + e);
-        }
     }
 
     /** Season start dates (MM-DD) from config, falling back to {@link Seasons#ofDefaults()}'s values. */

@@ -1,0 +1,117 @@
+name: compat
+
+# Boots every supported Paper version headless with the freshly built plugin and checks that it
+# enables cleanly. The compile checks (./gradlew compatCheck) only prove the sources link against
+# each API; this proves the one jar actually loads and starts on each server.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+      - name: Build the plugin jar
+        run: ./gradlew jar --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trodden-jar
+          path: build/libs/Trodden-*.jar
+          if-no-files-found: error
+
+  boot:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { mc: "1.21.4", java: "21" }
+          - { mc: "1.21.8", java: "21" }
+          - { mc: "1.21.11", java: "21" }
+          - { mc: "26.1.2", java: "25" }
+          - { mc: "26.2", java: "25" }
+          - { mc: "26.3", java: "25" }
+    name: boot ${{ matrix.mc }} (Java ${{ matrix.java }})
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: trodden-jar
+          path: server/plugins
+
+      - name: Download Paper ${{ matrix.mc }} (latest build)
+        working-directory: server
+        run: |
+          ua="Trodden-CI (github.com/ThatHunky/trodden)"
+          url=$(curl -fsSL -A "$ua" "https://fill.papermc.io/v3/projects/paper/versions/${{ matrix.mc }}/builds" \
+            | jq -r 'sort_by(.id) | last | .downloads["server:default"].url')
+          echo "Paper jar: $url"
+          curl -fsSL -A "$ua" -o paper.jar "$url"
+          ls -l paper.jar plugins/
+
+      - name: Configure a small flat offline server
+        working-directory: server
+        run: |
+          echo "eula=true" > eula.txt
+          cat > server.properties <<'EOF'
+          online-mode=false
+          level-type=minecraft\:flat
+          generate-structures=false
+          spawn-protection=0
+          view-distance=4
+          simulation-distance=4
+          server-port=25565
+          enable-rcon=false
+          EOF
+
+      - name: Boot, wait for Done, stop
+        working-directory: server
+        run: |
+          mkfifo console
+          # Keep the fifo open for writing so the server never sees EOF on stdin before "stop".
+          sleep infinity > console &
+          keep=$!
+          java -Xms512M -Xmx1536M -jar paper.jar --nogui < console > server.log 2>&1 &
+          pid=$!
+          for i in $(seq 1 300); do
+            if grep -q 'Done (' server.log; then break; fi
+            if ! kill -0 "$pid" 2>/dev/null; then echo "server exited early"; break; fi
+            sleep 1
+          done
+          grep -q 'Done (' server.log || { cat server.log; echo "::error::no Done line"; kill $pid $keep || true; exit 1; }
+          echo stop > console
+          for i in $(seq 1 60); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+          kill -9 "$pid" 2>/dev/null || true
+          kill "$keep" 2>/dev/null || true
+
+      - name: Check the log
+        if: always()
+        working-directory: server
+        run: |
+          cat server.log
+          fail=0
+          grep -q 'Enabling Trodden v' server.log || { echo "::error::Trodden was never enabled"; fail=1; }
+          if grep -nE "Could not load '?plugins/Trodden|Error occurred while enabling Trodden|UnsupportedClassVersionError" server.log; then
+            echo "::error::Trodden failed to load or enable"; fail=1
+          fi
+          # Any exception or stack frame that mentions the plugin, from load to shutdown.
+          if grep -nE 'dev\.thathunky\.trodden|\[Trodden\].*(Exception|Error|SEVERE)' server.log \
+              | grep -vE 'Enabling Trodden|Disabling Trodden|Loading server plugin Trodden'; then
+            echo "::error::exception from Trodden in the log"; fail=1
+          fi
+          exit $fail

@@ -8,7 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 /**
- * Settles autumn leaf litter ({@code LEAF_LITTER}, vanilla in 26.2, so Bedrock players see the
+ * Settles autumn leaf litter ({@code LEAF_LITTER}, vanilla since 1.21.5, so Bedrock players see the
  * same block through Geyser) under tree canopies, and clears it away again in spring. Runs on the
  * region thread that already owns the block's chunk (see {@link Sched#atLocation}) and must never
  * schedule anything itself — it only ever looks at the one block it was given and a small
@@ -17,6 +17,8 @@ import org.bukkit.block.BlockFace;
  * <p>The block {@link Sampler} hands the probe is treated as the space litter would occupy — the
  * same convention {@link WearListener#groundUnder} uses the other way around (feet block, ground
  * below) — so the ground here is one block below what the probe was given.
+ *
+ * <p>Only registered when the server has the block ({@link Compat#LEAF_LITTER}); on 1.21.4 it is not.
  */
 final class LitterProbe implements Sampler.Probe {
 
@@ -58,12 +60,12 @@ final class LitterProbe implements Sampler.Probe {
         if (ThreadLocalRandom.current().nextDouble() > chance || !plugin.wearAllowedAt(above.getLocation())) {
             return;
         }
-        above.setType(Material.LEAF_LITTER, true);
+        above.setType(Compat.LEAF_LITTER, true);
     }
 
     /** Spring: with the same configured chance, remove litter this probe lands on. */
     private void clear(Block above) {
-        if (above.getType() != Material.LEAF_LITTER) {
+        if (!Compat.is(above.getType(), Compat.LEAF_LITTER)) {
             return;
         }
         if (ThreadLocalRandom.current().nextDouble() > chance || !plugin.wearAllowedAt(above.getLocation())) {
@@ -96,7 +98,7 @@ final class LitterProbe implements Sampler.Probe {
                 if (dx == 0 && dz == 0) {
                     continue;
                 }
-                if (above.getRelative(dx, 0, dz).getType() == Material.LEAF_LITTER) {
+                if (Compat.is(above.getRelative(dx, 0, dz).getType(), Compat.LEAF_LITTER)) {
                     count++;
                 }
             }

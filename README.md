@@ -10,7 +10,31 @@ donkeys/mules/camels wear the ground too.
 Trodden was built for and runs on a real, Ukrainian-language Minecraft server (where it shipped
 under the name MatsuriWear) and is now maintained here as its own project. The `/paths` command,
 its Ukrainian aliases (`стежки`, `stezhky`) and subcommand words, and the Ukrainian/English
-player-facing text are unchanged — they're what live players already type and read.
+player-facing text are unchanged — they're what live players already type and read. Other languages
+were added on top; see [Languages](#languages).
+
+## Supported versions
+
+One jar for Paper **1.21.4 through 1.21.11, 26.1.x, 26.2 and 26.3**. It is Java 21 bytecode, so it
+loads on the Java 21 servers of the 1.21 line as well as on the Java 25 servers of 26.x, and
+`plugin.yml` declares `api-version: '1.21.4'`, so older servers refuse it instead of half-working.
+
+1.21.4 is the floor because it is the oldest version this jar was checked against, and the code
+already depends on the 1.21.3+ attribute API (`Attribute` as registry-backed interface,
+`Attribute.MOVEMENT_SPEED`, modifiers keyed by `NamespacedKey`). One feature needs a newer server:
+autumn leaf litter uses the vanilla `leaf_litter` block from 1.21.5, so on 1.21.4 the litter probe
+logs one line at startup and stays off; everything else works the same. Blocks that don't exist on
+every version are looked up by name at runtime (`Compat`), never linked as `Material` constants.
+
+How that is checked:
+
+- `./gradlew compatCheck` (part of `check`) compiles the sources against paper-api 1.21.4, 1.21.8,
+  1.21.11, 26.1.2, 26.2 and 26.3, so a method or block a supported version lacks fails the build.
+- `.github/workflows/compat.yml` boots each of those Paper versions headless in CI with the built jar
+  (flat world, offline, the matching Java), waits for `Done`, and fails if Trodden did not enable or
+  logged an exception.
+
+Only 26.2 has run on a live server with players; the other versions have been started, not played.
 
 ## Design constraint: no world scans
 
@@ -74,9 +98,9 @@ server's own jars.
 ./gradlew build
 ```
 
-Produces `build/libs/Trodden-1.0.0.jar`, the shaded jar with bStats bundled and relocated.
-`./gradlew build` runs `TestMain`'s server-free checks as part of `check`, and fails the build
-if any of them fail.
+Produces `build/libs/Trodden-1.1.0.jar`. `./gradlew build` runs `TestMain`'s server-free checks
+and the per-version compile checks (`compatCheck`) as part of `check`, and fails the build if any of
+them fail.
 
 Needs a JDK that can supply a Java 25 toolchain (Gradle will provision one via its toolchain
 resolver if none is installed locally) and network access to:
@@ -86,7 +110,7 @@ resolver if none is installed locally) and network access to:
 - `jitpack.io` — GriefPrevention, LandsAPI
 - `repo.glaremasters.me` — Towny
 - `repo.william278.net` — HuskClaims
-- Maven Central — bStats, the shadow plugin
+- Maven Central
 
 ### `build.sh` (maintainer's local fast path)
 
@@ -98,9 +122,8 @@ This is what actually ships to the live server it was built for, and is not mean
 it compiles straight with `javac` against that server's `libraries/` folder (`SERVER`, defaulting to
 the maintainer's own server path, can be overridden to point at any similarly-laid-out Paper install)
 plus the claim-plugin jars in `libs/` (not committed — vendor your own if you want to build the four
-untested adapters), runs `TestMain`, and only writes the jar if every check passes. It does not
-include bStats: that class lives outside `src/main/java` specifically so this path never needs it
-(see `src/bstats/java/.../PluginMetrics.java` for why).
+untested adapters), runs `TestMain`, and only writes the jar if every check passes. It emits Java 21
+bytecode like the Gradle build, but compiles against one API only; the per-version checks are Gradle's.
 
 ## Configuration
 
@@ -108,21 +131,27 @@ See `config.yml` — every option is commented in place. The short version: thre
 coarse dirt to path, which blocks count as grass, per-world enable, the claims preference order, and
 independent on/off switches for regrowth, aging, litter, mud, snow tracks, and mount wear.
 
-Player-facing text lives in `lang/en.yml` and `lang/uk.yml`, selected by `language` in `config.yml`.
 Players toggle trampling in their own claim with `/paths on|off|state`.
 
-## bStats
+## Languages
 
-The Gradle build shades and relocates [bStats](https://bstats.org) (`org.bstats` ->
-`dev.thathunky.trodden.libs.bstats`), starting standard metrics only — no custom charts. Before
-shipping a build you intend to actually run, register the plugin at
-[bstats.org/what-is-my-plugin-id](https://bstats.org/what-is-my-plugin-id) and put the id it gives
-you into `PLUGIN_ID` in `src/bstats/java/dev/thathunky/trodden/stats/PluginMetrics.java` — it ships as a
-placeholder (`0`) that makes the plugin log a warning and skip starting metrics instead of reporting
-under someone else's id.
+Bundled: English (`en`), Ukrainian (`uk`), German (`de`), Spanish (`es`), French (`fr`), Polish
+(`pl`), Brazilian Portuguese (`pt_BR`), Japanese (`ja`) and Simplified Chinese (`zh_CN`).
 
-To turn metrics off on a running server regardless of that id, set `enabled: false` in the server's
-`plugins/bStats/config.yml` — that switch is global to bStats, not specific to this plugin.
+Each player reads messages in their game client's language (`Player#locale()`), looked up as the
+exact tag first (`pt_BR`), then the bare language (`de_AT` gets `de`), then another file of the same
+language (`pt_PT` gets `pt_BR`, `zh_TW` gets `zh_CN`). A player whose language has no file gets
+`language` from `config.yml`, and English after that. The console always uses `language`. The
+choice is made per message, so a player who switches language in the client sees it right away.
+
+The file for `language` is copied to the plugin folder's `lang/` on first start so you can edit it.
+Any `lang/<tag>.yml` in that folder overrides the bundled file of the same name, or adds a language
+the jar doesn't have. A key missing from a file falls back to the bundled copy of that language, then
+to `language`, then to English, with one warning per key in the console.
+
+The command stays `/paths` in every language; `/стежки` and `/stezhky` are aliases, and the
+subcommands accept `on`/`off`/`state` as well as `увімкнути`/`вимкнути`/`стан`. `TestMain` checks
+that every bundled file has exactly the keys of `lang/en.yml`, with the same tags and placeholders.
 
 ## License
 
