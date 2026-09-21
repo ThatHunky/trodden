@@ -1,0 +1,9 @@
+# Texte für Spieler: /paths (стежки) — Trodden.
+paths-on: "<green>Fertig: In diesem Grundstück wird der Boden jetzt ausgetreten.</green>"
+paths-off: "<green>Fertig: In diesem Grundstück wird der Boden nicht mehr ausgetreten.</green>"
+paths-state-on: "<green>In diesem Grundstück wird der Boden ausgetreten.</green>"
+paths-state-off: "<gray>In diesem Grundstück wird der Boden nicht ausgetreten. Der Besitzer kann: <white>/paths on</white></gray>"
+not-in-claim: "<gray>Das ist kein Grundstück — hier nutzt sich der Boden beim Laufen immer ab.</gray>"
+not-your-claim: "<red>Das kann nur der Besitzer des Grundstücks ändern.</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>Nur für Spieler: Du musst in deinem eigenen Grundstück stehen.</gray>"

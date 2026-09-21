@@ -1,7 +1,14 @@
 package dev.thathunky.trodden;
 
 import dev.thathunky.trodden.claims.ClaimsProvider;
+import java.io.File;
+import java.net.URL;
 import java.time.LocalDate;
+import java.util.Locale;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.bukkit.configuration.file.YamlConfiguration;
 import java.time.MonthDay;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +46,8 @@ public final class TestMain {
         litterTests();
         mudTests();
         messageTests();
+        langFileTests();
+        localeTests();
         System.out.println("checks: " + passed + " passed, " + failed + " failed");
         if (failed > 0) {
             System.exit(1);
@@ -262,5 +271,85 @@ public final class TestMain {
                 Messages.fill("paths are on in <b>{claim}</b>", Map.of("claim", "Home"))), "key substitution");
         check("no key".equals(Messages.fill("no key", Map.of("claim", "Home"))), "a string with no keys is unchanged");
         check("{unknown} stays".equals(Messages.fill("{unknown} stays", Map.of())), "an unknown key is left as is");
+    }
+
+    private static final Pattern TAG = Pattern.compile("</?([a-z_]+)[^>]*>");
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{[a-z_-]+}");
+
+    /** Sorted MiniMessage tags and {placeholders} of a string — must be the same in every language. */
+    static List<String> markup(String s) {
+        List<String> out = new java.util.ArrayList<>();
+        Matcher m = TAG.matcher(s);
+        while (m.find()) {
+            out.add(m.group());
+        }
+        m = PLACEHOLDER.matcher(s);
+        while (m.find()) {
+            out.add(m.group());
+        }
+        out.sort(null);
+        return out;
+    }
+
+    /** Every lang file has exactly en.yml's keys, the same markup, and is listed in BUNDLED. */
+    static void langFileTests() {
+        Logger log = Logger.getLogger("test");
+        YamlConfiguration en = Messages.loadBundled("en", log);
+        check(en != null, "lang/en.yml is on the classpath");
+        if (en == null) {
+            return;
+        }
+        Set<String> enKeys = Messages.keys(en);
+        check(!enKeys.isEmpty(), "en.yml has keys");
+        for (String tag : Messages.BUNDLED) {
+            YamlConfiguration y = Messages.loadBundled(tag, log);
+            check(y != null, "lang/" + tag + ".yml is on the classpath");
+            if (y == null) {
+                continue;
+            }
+            Set<String> keys = Messages.keys(y);
+            Set<String> missing = new TreeSet<>(enKeys);
+            missing.removeAll(keys);
+            Set<String> extra = new TreeSet<>(keys);
+            extra.removeAll(enKeys);
+            check(missing.isEmpty(), tag + ".yml is missing keys " + missing);
+            check(extra.isEmpty(), tag + ".yml has keys en.yml does not " + extra);
+            for (String k : enKeys) {
+                String v = y.getString(k);
+                check(v != null && !v.isBlank(), tag + ".yml: " + k + " is empty");
+                if (v != null) {
+                    check(markup(v).equals(markup(en.getString(k))), tag + ".yml: " + k + " has different tags or placeholders");
+                }
+            }
+        }
+        // Every file in the lang/ folder must be in BUNDLED, or players would never be offered it.
+        URL dir = Messages.class.getClassLoader().getResource("lang");
+        if (dir != null && "file".equals(dir.getProtocol())) {
+            File[] files = new File(dir.getPath()).listFiles((d, n) -> n.endsWith(".yml"));
+            check(files != null && files.length == Messages.BUNDLED.size(),
+                    "lang/ has exactly the files listed in Messages.BUNDLED");
+            if (files != null) {
+                for (File f : files) {
+                    String tag = f.getName().substring(0, f.getName().length() - 4);
+                    check(Messages.BUNDLED.contains(tag), "lang/" + f.getName() + " is listed in Messages.BUNDLED");
+                }
+            }
+        } else {
+            check(false, "lang/ is a plain folder on the test classpath");
+        }
+    }
+
+    static void localeTests() {
+        List<String> tags = Messages.BUNDLED;
+        check("pt_BR".equals(Messages.resolve(Locale.of("pt", "BR"), tags, "en")), "pt_BR exact");
+        check("pt_BR".equals(Messages.resolve(Locale.of("pt", "PT"), tags, "en")), "pt_PT gets pt_BR");
+        check("de".equals(Messages.resolve(Locale.of("de", "AT"), tags, "en")), "de_AT gets de");
+        check("zh_CN".equals(Messages.resolve(Locale.of("zh", "CN"), tags, "en")), "zh_CN exact");
+        check("zh_CN".equals(Messages.resolve(Locale.of("zh", "TW"), tags, "en")), "zh_TW gets zh_CN");
+        check("uk".equals(Messages.resolve(Locale.of("uk", "UA"), tags, "en")), "uk_UA gets uk");
+        check("ja".equals(Messages.resolve(Locale.of("ja", "JP"), tags, "en")), "ja_JP gets ja");
+        check("uk".equals(Messages.resolve(Locale.of("it", "IT"), tags, "uk")), "no Italian — config language");
+        check("uk".equals(Messages.resolve(null, tags, "uk")), "no locale — config language");
+        check("en".equals(Messages.resolve(Locale.of("en", "GB"), tags, "uk")), "en_GB gets en");
     }
 }

@@ -1,0 +1,9 @@
+# プレイヤー向けテキスト: /paths (стежки) — Trodden。
+paths-on: "<green>完了: この保護エリアでは、歩くと地面が踏み固められるようになりました。</green>"
+paths-off: "<green>完了: この保護エリアでは、歩いても地面が踏み固められなくなりました。</green>"
+paths-state-on: "<green>この保護エリアでは、歩くと地面が踏み固められます。</green>"
+paths-state-off: "<gray>この保護エリアでは、地面は踏み固められません。所有者は次のコマンドで変更できます: <white>/paths on</white></gray>"
+not-in-claim: "<gray>ここは保護エリアではありません。歩くと地面は常にすり減ります。</gray>"
+not-your-claim: "<red>これを変更できるのは保護エリアの所有者だけです。</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>プレイヤー専用です。自分の保護エリアの中に立って使ってください。</gray>"

@@ -1,0 +1,9 @@
+# Textes pour les joueurs : /paths (стежки) — Trodden.
+paths-on: "<green>C'est fait : le sol s'use désormais sous les pas dans cette parcelle.</green>"
+paths-off: "<green>C'est fait : le sol ne s'use plus sous les pas dans cette parcelle.</green>"
+paths-state-on: "<green>Dans cette parcelle, le sol s'use sous les pas.</green>"
+paths-state-off: "<gray>Dans cette parcelle, le sol ne s'use pas. Le propriétaire peut faire : <white>/paths on</white></gray>"
+not-in-claim: "<gray>Ce n'est pas une parcelle : ici, le sol s'use toujours quand on marche.</gray>"
+not-your-claim: "<red>Seul le propriétaire de la parcelle peut changer ça.</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>Réservé aux joueurs : tu dois te tenir dans ta propre parcelle.</gray>"

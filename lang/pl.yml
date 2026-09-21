@@ -1,0 +1,9 @@
+# Teksty dla graczy: /paths (стежки) — Trodden.
+paths-on: "<green>Gotowe: na tej działce ziemia będzie się teraz wydeptywać.</green>"
+paths-off: "<green>Gotowe: na tej działce ziemia już się nie wydeptuje.</green>"
+paths-state-on: "<green>Na tej działce ziemia się wydeptuje.</green>"
+paths-state-off: "<gray>Na tej działce ziemia się nie wydeptuje. Właściciel może wpisać: <white>/paths on</white></gray>"
+not-in-claim: "<gray>To nie jest działka — tutaj ziemia zawsze wyciera się od chodzenia.</gray>"
+not-your-claim: "<red>Tylko właściciel działki może to zmienić.</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>Tylko dla graczy: musisz stać na swojej działce.</gray>"

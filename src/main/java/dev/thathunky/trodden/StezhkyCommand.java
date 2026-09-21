@@ -28,7 +28,7 @@ final class StezhkyCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player p)) {
-            sender.sendMessage("Players only: you need to be standing in your own claim.");
+            messages.send(sender, "players-only", Map.of());
             return true;
         }
         String sub = args.length == 0 ? "state" : args[0].toLowerCase();

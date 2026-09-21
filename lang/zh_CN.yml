@@ -1,0 +1,9 @@
+# 玩家可见文本：/paths (стежки) — Trodden。
+paths-on: "<green>完成：此领地内的地面现在会被踩出小路。</green>"
+paths-off: "<green>完成：此领地内的地面不会再被踩出小路。</green>"
+paths-state-on: "<green>此领地内的地面会被踩出小路。</green>"
+paths-state-off: "<gray>此领地内的地面不会被踩出小路。领地主人可以输入：<white>/paths on</white></gray>"
+not-in-claim: "<gray>这里不是领地，走路总会磨损地面。</gray>"
+not-your-claim: "<red>只有领地主人才能更改此设置。</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>仅限玩家使用：你需要站在自己的领地内。</gray>"

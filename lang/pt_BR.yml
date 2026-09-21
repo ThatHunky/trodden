@@ -1,0 +1,9 @@
+# Textos para jogadores: /paths (стежки) — Trodden.
+paths-on: "<green>Pronto: agora o chão se desgasta com os passos neste terreno.</green>"
+paths-off: "<green>Pronto: o chão não se desgasta mais com os passos neste terreno.</green>"
+paths-state-on: "<green>Neste terreno, o chão se desgasta com os passos.</green>"
+paths-state-off: "<gray>Neste terreno, o chão não se desgasta. O dono pode usar: <white>/paths on</white></gray>"
+not-in-claim: "<gray>Isto não é um terreno protegido: aqui o chão sempre se desgasta ao caminhar.</gray>"
+not-your-claim: "<red>Só o dono do terreno pode mudar isso.</red>"
+usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>Só para jogadores: você precisa estar no seu próprio terreno.</gray>"

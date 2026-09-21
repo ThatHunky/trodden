@@ -1,6 +1,8 @@
 # Ground trampling by players.
-# Language of player-facing messages: en or uk (files in lang/ inside the jar, or a custom one in
-# the plugin folder's lang/).
+# Each player gets messages in their game client's language when there is a file for it:
+# en, uk, de, es, fr, pl, pt_BR, ja, zh_CN (bundled in the jar), or any lang/<tag>.yml you put in
+# the plugin folder — a file there also overrides the bundled one of the same name.
+# This is the fallback for players whose language has no file, and the language of the console.
 language: en
 # The counter is cumulative: a step = a player moved onto a block (while on the ground, in
 # survival/adventure).

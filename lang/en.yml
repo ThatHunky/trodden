@@ -7,3 +7,4 @@ paths-state-off: "<gray>Trampling isn't happening in this claim. The owner can: 
 not-in-claim: "<gray>This isn't a claim — the ground always wears from walking here.</gray>"
 not-your-claim: "<red>Only the claim owner can change this.</red>"
 usage: "<gray>/paths on | off | state</gray>"
+players-only: "<gray>Players only: you need to be standing in your own claim.</gray>"
